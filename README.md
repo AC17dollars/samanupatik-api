@@ -2,7 +2,7 @@
 An API for real-time data provided by Election Commission for samanupatik leaderboards.
 
 # Use
-`path: '/'      -> provides leaderboards with party name and total votes received`
+`path: '/'      -> provides leaderboards with party name and total votes received` <br>
 `path: '/misc'  -> provides miscellaneous data for '/'`
 
 # Build
