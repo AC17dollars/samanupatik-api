@@ -16,6 +16,7 @@ async function initialFetch() {
     cachedData.data = [];
     try {
         const response = await axios.get("https://result.election.gov.np/JSONFiles/Election2079/Common/PRHoRPartyTop5.txt");
+        cachedData.data = [];
         for(let i=0; i<response.data.length; i++){
             const singleData = {
                 TotalVoteReceived: response.data[i].TotalVoteReceived,
@@ -39,6 +40,7 @@ app.get("/", async (req, res) => {
             res.send(cachedData.data);
         } else {
             const response = await axios.get("https://result.election.gov.np/JSONFiles/Election2079/Common/PRHoRPartyTop5.txt");
+            cachedData.data = [];
             for(let i=0; i<response.data.length; i++){
                 const singleData = {
                     TotalVoteReceived: response.data[i].TotalVoteReceived,
@@ -61,6 +63,7 @@ app.get("/misc", async (req, res) => {
     if (!((Date.now() - cachedData.time) <= 60000)) {
         try{
             const response = await axios.get("https://result.election.gov.np/JSONFiles/Election2079/Common/PRHoRPartyTop5.txt");
+            cachedData.data = [];
             for(let i=0; i<response.data.length; i++){
                 const singleData = {
                     TotalVoteReceived: response.data[i].TotalVoteReceived,
