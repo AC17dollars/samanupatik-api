@@ -1,8 +1,12 @@
-// functions/api/[[route]].ts
 import { Hono } from "hono";
-import { handle } from "hono/cloudflare-pages";
+import type { Fetcher } from "@cloudflare/workers-types";
 
-const app = new Hono().basePath("/api");
+type Bindings = {
+  ASSETS: Fetcher;
+};
+
+// API routes (mounted at /api via app.route)
+const api = new Hono<{ Bindings: Bindings }>();
 
 const TOTAL_SEATS = 110;
 const THRESHOLD_PERCENT = 3;
@@ -77,7 +81,7 @@ function calculateSeats(parties: Party[]) {
     invalidParties: invalidParties.sort((a, b) => b.votes - a.votes),
   };
 }
-app.get("/election-results", async (c) => {
+api.get("/election-results", async (c) => {
   const USER_AGENT =
     "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0";
 
@@ -95,7 +99,9 @@ app.get("/election-results", async (c) => {
     },
   );
 
-  const cookies = pageRes.headers.getSetCookie() || [];
+  const cookies =
+    (pageRes.headers as Headers & { getSetCookie?(): string[] }).getSetCookie?.() ??
+    [];
   let sessionId = "";
   let csrfToken = "";
   for (const c of cookies) {
@@ -159,4 +165,20 @@ app.get("/election-results", async (c) => {
   });
 });
 
-export const onRequest = handle(app);
+// Main app: API at /api/*, React SPA fallback for everything else
+const app = new Hono<{ Bindings: Bindings }>();
+app.route("/api", api);
+app.all("*", async (c): Promise<Response> => {
+  try {
+    const asset = await c.env.ASSETS.fetch(c.req.raw);
+    if (asset.status === 404) {
+      return new Response("Not Found", { status: 404 });
+    }
+    return asset;
+  } catch (err) {
+    console.error(err);
+    return new Response("Internal Server Error", { status: 500 });
+  }
+});
+
+export default app;
