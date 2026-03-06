@@ -182,7 +182,7 @@ function jsonResponse(
   const body = JSON.stringify(data);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Cache-Control": "public, max-age=86400",
+    "Cache-Control": "no-cache",
     "X-Cache": opts?.cacheStatus ?? "miss",
   };
   if (opts?.cachedAt != null) headers["X-Cached-At"] = String(opts.cachedAt);
