@@ -130,22 +130,25 @@ const ElectionDashboard: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-900 text-white">
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
+                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider w-16">
                     Rank
                   </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
+                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider min-w-[220px]">
                     Political Party
                   </th>
                   <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
-                    Votes
+                    <span className="block">Votes</span>
+                    <span className="font-normal opacity-80 text-[10px] normal-case mt-0.5">
+                      Valid PR
+                    </span>
                   </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center">
+                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-20">
                     Seats
                   </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center">
+                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
                     Extra Seats
                   </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center">
+                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
                     Total Seats
                   </th>
                 </tr>
@@ -160,15 +163,15 @@ const ElectionDashboard: React.FC = () => {
                       {String(index + 1).padStart(2, "0")}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg border border-slate-200 p-1 bg-white group-hover:scale-110 transition-transform">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white group-hover:scale-105 transition-transform">
                           <img
                             src={party.symbolUrl}
                             alt={party.name}
                             className="w-full h-full object-contain"
                           />
                         </div>
-                        <span className="font-bold text-slate-800 text-lg">
+                        <span className="font-bold text-slate-800 text-lg truncate">
                           {party.name}
                         </span>
                       </div>
@@ -176,9 +179,6 @@ const ElectionDashboard: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="text-slate-700 font-medium">
                         {party.votes.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-slate-400 italic">
-                        Valid PR Votes
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">{party.seats}</td>
@@ -207,7 +207,7 @@ const ElectionDashboard: React.FC = () => {
                   key={party.name}
                   className="flex items-center gap-3 p-4 bg-slate-100 border border-slate-200 rounded-xl opacity-60 hover:opacity-80 transition"
                 >
-                  <div className="w-10 h-10 rounded-lg border border-slate-300 p-1 bg-white">
+                  <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-300 overflow-hidden bg-white">
                     <img
                       src={party.symbolUrl}
                       alt={party.name}
