@@ -225,6 +225,110 @@ const ElectionDashboard: React.FC = () => {
             </div>
           </div>
         )}
+        {/* Methodology Section */}
+        <section className="mt-12 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-800">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs">
+              ?
+            </span>
+            How are these seats calculated?
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Simple Explanation */}
+            <div className="space-y-4">
+              <p className="text-sm leading-relaxed text-slate-600">
+                Seats are awarded one-by-one using the{" "}
+                <strong>Modified Sainte-Laguë</strong> method. It ensures the
+                parliament reflects the total vote share while being fair to
+                mid-sized parties.
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="text-blue-600 font-bold">1.</div>
+                  <p className="text-sm">
+                    <strong>The 3% Cut-off:</strong> First, any party with less
+                    than 3% of total votes is disqualified to prevent too many
+                    tiny parties.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="text-blue-600 font-bold">2.</div>
+                  <p className="text-sm">
+                    <strong>The "Penalty" Rule:</strong> Every time a party wins
+                    a seat, it becomes <strong>much harder</strong> for them to
+                    win the next one. We divide their votes by a bigger number
+                    each time (1.4, then 3, 5, 7...).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Complete Example */}
+            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+              <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">
+                Example: Awarding 2 Seats
+              </h3>
+
+              <div className="space-y-4">
+                {/* Round 1 */}
+                <div>
+                  <p className="text-[10px] font-bold text-blue-600 uppercase mb-1">
+                    Round 1: First Seat
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 bg-white rounded border border-blue-100">
+                      <span className="block text-slate-500">
+                        Party A (10k votes)
+                      </span>
+                      <span className="font-mono font-bold">
+                        10,000 ÷ 1.4 = 7,142
+                      </span>
+                    </div>
+                    <div className="p-2 bg-white rounded border border-slate-200">
+                      <span className="block text-slate-500">
+                        Party B (8k votes)
+                      </span>
+                      <span className="font-mono">8,000 ÷ 1.4 = 5,714</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] mt-1 text-slate-500">
+                    🏆 <strong>Party A</strong> wins Seat #1 (7,142 is highest).
+                  </p>
+                </div>
+
+                {/* Round 2 */}
+                <div>
+                  <p className="text-[10px] font-bold text-orange-600 uppercase mb-1">
+                    Round 2: The Penalty in Action
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 bg-orange-50 rounded border border-orange-200">
+                      <span className="block text-slate-500">
+                        Party A (Has 1 Seat)
+                      </span>
+                      <span className="font-mono font-bold">
+                        10,000 ÷ 3 = 3,333
+                      </span>
+                    </div>
+                    <div className="p-2 bg-white rounded border border-slate-200 shadow-sm">
+                      <span className="block text-slate-500">
+                        Party B (Has 0 Seats)
+                      </span>
+                      <span className="font-mono font-bold">
+                        8,000 ÷ 1.4 = 5,714
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] mt-1 text-slate-500">
+                    🏆 <strong>Party B</strong> wins Seat #2 (5,714 is highest).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Footer */}
         <footer className="mt-8 flex flex-col sm:flex-row justify-between items-center text-slate-500 gap-4">
