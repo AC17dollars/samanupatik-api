@@ -81,8 +81,8 @@ function calculateSeats(parties: Party[]) {
     invalidParties: invalidParties.sort((a, b) => b.votes - a.votes),
   };
 }
-const CACHE_KEY = "https://internal/election-results";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_MAX_AGE = 300; // 5 min, for Cache-Control header
 
 async function fetchElectionData(): Promise<{
   total_votes: number;
@@ -177,13 +177,16 @@ async function fetchElectionData(): Promise<{
 
 function jsonResponse(
   data: unknown,
-  opts?: { cachedAt?: number; cacheStatus?: "hit" | "miss" | "stale" },
+  opts?: {
+    cachedAt?: number;
+    cacheStatus?: "hit" | "miss" | "stale" | "revalidated";
+  },
 ): Response {
   const body = JSON.stringify(data);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "Cache-Control": "no-cache",
     "X-Cache": opts?.cacheStatus ?? "miss",
+    "Cache-Control": `public, max-age=${CACHE_MAX_AGE}`,
   };
   if (opts?.cachedAt != null) headers["X-Cached-At"] = String(opts.cachedAt);
   return new Response(body, { headers });
@@ -203,10 +206,10 @@ function withCacheHeader(
 }
 
 api.get("/election-results", async (c) => {
-  const cacheReq = new Request(CACHE_KEY);
-  const cached = await caches.default.match(cacheReq);
-
   const now = Date.now();
+  const cacheKeyUrl = new URL("/api/election-results", c.req.url).href;
+  const cacheReq = new Request(cacheKeyUrl);
+  const cached = await caches.default.match(cacheReq);
 
   if (cached) {
     const cachedAt = parseInt(cached.headers.get("X-Cached-At") || "0", 10);
@@ -216,19 +219,19 @@ api.get("/election-results", async (c) => {
       return withCacheHeader(cached, "hit");
     }
 
-    // Cache invalid — try to revalidate
     try {
       const data = await fetchElectionData();
-      const res = jsonResponse(data, { cachedAt: now, cacheStatus: "miss" });
+      const res = jsonResponse(data, {
+        cachedAt: now,
+        cacheStatus: "revalidated",
+      });
       await caches.default.put(cacheReq, res.clone());
       return res;
     } catch {
-      // Fetch error — return stale cache, never revalidate
       return withCacheHeader(cached, "stale");
     }
   }
 
-  // No cache — fetch external
   try {
     const data = await fetchElectionData();
     const res = jsonResponse(data, { cachedAt: now, cacheStatus: "miss" });
