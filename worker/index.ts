@@ -81,7 +81,16 @@ function calculateSeats(parties: Party[]) {
     invalidParties: invalidParties.sort((a, b) => b.votes - a.votes),
   };
 }
-api.get("/election-results", async (c) => {
+const CACHE_KEY = "https://internal/election-results";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+async function fetchElectionData(): Promise<{
+  total_votes: number;
+  total_qualified_votes: number;
+  threshold_limit: number;
+  seat_allocation: unknown[];
+  invalid_parties: unknown[];
+}> {
   const USER_AGENT =
     "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0";
 
@@ -100,14 +109,16 @@ api.get("/election-results", async (c) => {
   );
 
   const cookies =
-    (pageRes.headers as Headers & { getSetCookie?(): string[] }).getSetCookie?.() ??
-    [];
+    (
+      pageRes.headers as Headers & { getSetCookie?(): string[] }
+    ).getSetCookie?.() ?? [];
   let sessionId = "";
   let csrfToken = "";
-  for (const c of cookies) {
-    if (c.startsWith("ASP.NET_SessionId"))
-      sessionId = c.split(";")[0].split("=")[1];
-    if (c.startsWith("CsrfToken")) csrfToken = c.split(";")[0].split("=")[1];
+  for (const cookie of cookies) {
+    if (cookie.startsWith("ASP.NET_SessionId"))
+      sessionId = cookie.split(";")[0].split("=")[1];
+    if (cookie.startsWith("CsrfToken"))
+      csrfToken = cookie.split(";")[0].split("=")[1];
   }
 
   const cookieHeader = `ASP.NET_SessionId=${sessionId}; CsrfToken=${csrfToken}`;
@@ -128,8 +139,7 @@ api.get("/election-results", async (c) => {
     },
   );
 
-  if (!dataRes.ok)
-    return c.json({ error: "upstream forbidden", status: dataRes.status }, 500);
+  if (!dataRes.ok) throw new Error(`upstream forbidden: ${dataRes.status}`);
 
   const rawData: {
     PoliticalPartyName: string | null;
@@ -156,13 +166,77 @@ api.get("/election-results", async (c) => {
 
   const result = calculateSeats(parties);
 
-  return c.json({
+  return {
     total_votes: result.totalVotes,
     total_qualified_votes: result.totalQualifiedVotes,
     threshold_limit: result.thresholdVotes,
     seat_allocation: result.seatAllocation,
     invalid_parties: result.invalidParties,
+  };
+}
+
+function jsonResponse(
+  data: unknown,
+  opts?: { cachedAt?: number; cacheStatus?: "hit" | "miss" | "stale" },
+): Response {
+  const body = JSON.stringify(data);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Cache-Control": "public, max-age=86400",
+    "X-Cache": opts?.cacheStatus ?? "miss",
+  };
+  if (opts?.cachedAt != null) headers["X-Cached-At"] = String(opts.cachedAt);
+  return new Response(body, { headers });
+}
+
+function withCacheHeader(
+  res: Response,
+  status: "hit" | "miss" | "stale",
+): Response {
+  const headers = new Headers(res.headers);
+  headers.set("X-Cache", status);
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
   });
+}
+
+api.get("/election-results", async (c) => {
+  const cacheReq = new Request(CACHE_KEY);
+  const cached = await caches.default.match(cacheReq);
+
+  const now = Date.now();
+
+  if (cached) {
+    const cachedAt = parseInt(cached.headers.get("X-Cached-At") || "0", 10);
+    const isFresh = cachedAt > 0 && now - cachedAt < CACHE_TTL_MS;
+
+    if (isFresh) {
+      return withCacheHeader(cached, "hit");
+    }
+
+    // Cache invalid — try to revalidate
+    try {
+      const data = await fetchElectionData();
+      const res = jsonResponse(data, { cachedAt: now, cacheStatus: "miss" });
+      await caches.default.put(cacheReq, res.clone());
+      return res;
+    } catch {
+      // Fetch error — return stale cache, never revalidate
+      return withCacheHeader(cached, "stale");
+    }
+  }
+
+  // No cache — fetch external
+  try {
+    const data = await fetchElectionData();
+    const res = jsonResponse(data, { cachedAt: now, cacheStatus: "miss" });
+    await caches.default.put(cacheReq, res.clone());
+    return res;
+  } catch {
+    return c.json({ error: "upstream error" }, 500);
+  }
 });
 
 // Main app: API at /api/*, React SPA fallback for everything else
