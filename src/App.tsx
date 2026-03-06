@@ -225,6 +225,23 @@ const ElectionDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Mandatory Electoral Warning */}
+        <div className="mb-8 p-4 bg-slate-100 border-l-4 border-blue-600 rounded-r-xl shadow-sm text-sm">
+          <p className="text-slate-700 leading-relaxed">
+            <strong className="text-slate-900 uppercase text-xs block mb-1">
+              Notice
+            </strong>
+            This dashboard provides a{" "}
+            <strong>mathematical representation only</strong>. Actual seat
+            allocation is contingent upon a party's
+            <strong> National Party Status</strong> (requiring a 3% PR threshold
+            and at least 1 FPTP seat), attainment of minimum valid votes, and
+            strict adherence to <strong>inclusion criteria</strong>
+            (including 33% female representation and ethnic cluster quotas).
+          </p>
+        </div>
+
         {/* Methodology Section */}
         <section className="mt-12 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-800">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
