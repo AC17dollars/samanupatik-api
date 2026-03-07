@@ -7,6 +7,15 @@ interface PartyAllocation {
   seats: number; // allocated seats from main calculation
   extraSeats: number; // leftover seats (if applicable)
   totalSeats: number; // seats + extraSeats
+  votePercent?: number;
+  seatPercent?: number;
+  symbolUrl: string;
+}
+
+interface InvalidParty {
+  name: string;
+  votes: number;
+  votePercent?: number;
   symbolUrl: string;
 }
 
@@ -14,10 +23,7 @@ interface ElectionData {
   total_votes: number;
   threshold_limit: number;
   seat_allocation: PartyAllocation[];
-  invalid_parties: Omit<
-    PartyAllocation,
-    "seats" | "extraSeats" | "totalSeats"
-  >[];
+  invalid_parties: InvalidParty[];
 }
 
 const ElectionDashboard: React.FC = () => {
@@ -166,6 +172,12 @@ const ElectionDashboard: React.FC = () => {
                     </span>
                   </div>
                   <div>
+                    <span className="text-slate-500 block text-xs">Vote %</span>
+                    <span className="font-medium text-slate-700">
+                      {(party.votePercent ?? 0).toFixed(2)}%
+                    </span>
+                  </div>
+                  <div>
                     <span className="text-slate-500 block text-xs">Seats</span>
                     <span className="font-medium text-slate-700">
                       {party.seats}
@@ -177,6 +189,12 @@ const ElectionDashboard: React.FC = () => {
                       {party.extraSeats}
                     </span>
                   </div>
+                  <div>
+                    <span className="text-slate-500 block text-xs">Achieved %</span>
+                    <span className="font-medium text-blue-600">
+                      {(party.seatPercent ?? 0).toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -185,29 +203,35 @@ const ElectionDashboard: React.FC = () => {
           {/* Desktop: Table layout */}
           <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[640px] table-fixed text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-900 text-white">
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider w-16">
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider w-14">
                       Rank
                     </th>
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider min-w-[220px]">
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider w-[28%]">
                       Political Party
                     </th>
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider w-[14%]">
                       <span className="block">Votes</span>
                       <span className="font-normal opacity-80 text-[10px] normal-case mt-0.5">
                         Valid PR
                       </span>
                     </th>
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-20">
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider text-center w-[10%]">
+                      Vote %
+                    </th>
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider text-center w-[10%]">
                       Seats
                     </th>
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
-                      Extra Seats
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider text-center w-[10%]">
+                      Extra
                     </th>
-                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
-                      Total Seats
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider text-center w-[10%]">
+                      Total
+                    </th>
+                    <th className="px-3 py-4 font-semibold uppercase text-xs tracking-wider text-center w-[10%]">
+                      Achieved %
                     </th>
                   </tr>
                 </thead>
@@ -217,34 +241,45 @@ const ElectionDashboard: React.FC = () => {
                       key={party.name}
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
-                      <td className="px-6 py-4 text-slate-400 font-mono text-sm">
+                      <td className="px-3 py-4 text-slate-400 font-mono text-sm">
                         {String(index + 1).padStart(2, "0")}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white group-hover:scale-105 transition-transform">
+                      <td className="px-3 py-4 overflow-hidden">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="shrink-0 w-10 h-10 rounded-lg border border-slate-200 overflow-hidden bg-white group-hover:scale-105 transition-transform">
                             <img
                               src={party.symbolUrl}
                               alt={party.name}
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          <span className="font-bold text-slate-800 text-lg truncate">
+                          <span
+                            className="block font-bold text-slate-800 text-base truncate min-w-0"
+                            title={party.name}
+                          >
                             {party.name}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-4">
                         <div className="text-slate-700 font-medium">
                           {party.votes.toLocaleString()}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">{party.seats}</td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-3 py-4 text-center">
+                        {(party.votePercent ?? 0).toFixed(2)}%
+                      </td>
+                      <td className="px-3 py-4 text-center">{party.seats}</td>
+                      <td className="px-3 py-4 text-center">
                         {party.extraSeats}
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-3 py-4 text-center">
                         {party.totalSeats}
+                      </td>
+                      <td className="px-3 py-4 text-center">
+                        <span className="font-semibold text-blue-600">
+                          {(party.seatPercent ?? 0).toFixed(1)}%
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -276,7 +311,8 @@ const ElectionDashboard: React.FC = () => {
                   <div>
                     <p className="font-semibold text-slate-700">{party.name}</p>
                     <p className="text-xs text-slate-500">
-                      {party.votes.toLocaleString()} Votes
+                      {party.votes.toLocaleString()} Votes (
+                      {(party.votePercent ?? 0).toFixed(2)}%)
                     </p>
                   </div>
                 </div>
@@ -293,10 +329,10 @@ const ElectionDashboard: React.FC = () => {
             </strong>
             This dashboard provides a{" "}
             <strong>mathematical representation only</strong>. Actual seat
-            allocation is contingent upon a party's
-            <strong> National Party Status</strong> (requiring a 3% PR threshold
+            allocation is contingent upon a party's{" "}
+            <strong>National Party Status</strong>{" "}(requiring a 3% PR threshold
             and at least 1 FPTP seat), attainment of minimum valid votes, and
-            strict adherence to <strong>inclusion criteria</strong>
+            strict adherence to <strong>inclusion criteria</strong>{" "}
             (including 33% female representation and ethnic cluster quotas).
           </p>
         </div>
@@ -306,7 +342,7 @@ const ElectionDashboard: React.FC = () => {
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs">
               ?
-            </span>
+            </span>{" "}
             How are these seats calculated?
           </h2>
 
@@ -315,7 +351,7 @@ const ElectionDashboard: React.FC = () => {
             <div className="space-y-4">
               <p className="text-sm leading-relaxed text-slate-600">
                 Seats are awarded one-by-one using the{" "}
-                <strong>Modified Sainte-Laguë</strong> method. It ensures the
+                <strong>Modified Sainte-Laguë</strong>{" "}method. It ensures the
                 parliament reflects the total vote share while being fair to
                 mid-sized parties.
               </p>

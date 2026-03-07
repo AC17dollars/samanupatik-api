@@ -52,26 +52,34 @@ function calculateSeats(parties: Party[]) {
     );
   }
 
-  // --- Step 3: Compute extra seats ---
+  // --- Step 3: Compute extra seats and percentages ---
   const seatDistribution = qualified.map((p) => {
     const totalSeats = seatMap[p.name] || 0;
     const simpleSeats = simpleSeatsMap[p.name] || 0;
     const extraSeats = totalSeats - simpleSeats;
+    const votePercent = totalVotes > 0 ? (p.votes / totalVotes) * 100 : 0;
+    const seatPercent = (totalSeats / TOTAL_SEATS) * 100;
     return {
       name: p.name,
       votes: p.votes,
       seats: simpleSeats,
       extraSeats,
       totalSeats,
+      votePercent,
+      seatPercent,
       symbolUrl: `https://result.election.gov.np/Images/symbol-hor-pa/${p.symbolID}.jpg`,
     };
   });
 
-  const invalidParties = invalid.map((p) => ({
-    name: p.name,
-    votes: p.votes,
-    symbolUrl: `https://result.election.gov.np/Images/symbol-hor-pa/${p.symbolID}.jpg`,
-  }));
+  const invalidParties = invalid.map((p) => {
+    const votePercent = totalVotes > 0 ? (p.votes / totalVotes) * 100 : 0;
+    return {
+      name: p.name,
+      votes: p.votes,
+      votePercent,
+      symbolUrl: `https://result.election.gov.np/Images/symbol-hor-pa/${p.symbolID}.jpg`,
+    };
+  });
 
   return {
     totalVotes,
