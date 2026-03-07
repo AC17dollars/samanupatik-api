@@ -124,74 +124,133 @@ const ElectionDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Table */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mb-8">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900 text-white">
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider w-16">
-                    Rank
-                  </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider min-w-[220px]">
-                    Political Party
-                  </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
-                    <span className="block">Votes</span>
-                    <span className="font-normal opacity-80 text-[10px] normal-case mt-0.5">
-                      Valid PR
-                    </span>
-                  </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-20">
-                    Seats
-                  </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
-                    Extra Seats
-                  </th>
-                  <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
-                    Total Seats
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {data.seat_allocation.map((party, index) => (
-                  <tr
-                    key={party.name}
-                    className="hover:bg-blue-50/50 transition-colors group"
-                  >
-                    <td className="px-6 py-4 text-slate-400 font-mono text-sm">
+        {/* Main Table - Card layout on mobile, table on desktop */}
+        <div className="mb-8">
+          {/* Mobile: Card layout */}
+          <div className="md:hidden space-y-3">
+            {data.seat_allocation.map((party, index) => (
+              <div
+                key={party.name}
+                className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 hover:bg-blue-50/50 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-slate-400 font-mono text-sm shrink-0">
                       {String(index + 1).padStart(2, "0")}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white group-hover:scale-105 transition-transform">
-                          <img
-                            src={party.symbolUrl}
-                            alt={party.name}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <span className="font-bold text-slate-800 text-lg truncate">
-                          {party.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-700 font-medium">
-                        {party.votes.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">{party.seats}</td>
-                    <td className="px-6 py-4 text-center">
-                      {party.extraSeats}
-                    </td>
-                    <td className="px-6 py-4 text-center">
+                    </span>
+                    <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white">
+                      <img
+                        src={party.symbolUrl}
+                        alt={party.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <span className="font-bold text-slate-800 truncate">
+                      {party.name}
+                    </span>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className="text-2xl font-bold text-slate-900">
                       {party.totalSeats}
-                    </td>
+                    </span>
+                    <span className="block text-[10px] text-slate-500 uppercase tracking-wider">
+                      Total
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-sm">
+                  <div>
+                    <span className="text-slate-500 block text-xs">Votes</span>
+                    <span className="font-medium text-slate-700">
+                      {party.votes.toLocaleString()}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-xs">Seats</span>
+                    <span className="font-medium text-slate-700">
+                      {party.seats}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-xs">Extra</span>
+                    <span className="font-medium text-slate-700">
+                      {party.extraSeats}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table layout */}
+          <div className="hidden md:block bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 text-white">
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider w-16">
+                      Rank
+                    </th>
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider min-w-[220px]">
+                      Political Party
+                    </th>
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider">
+                      <span className="block">Votes</span>
+                      <span className="font-normal opacity-80 text-[10px] normal-case mt-0.5">
+                        Valid PR
+                      </span>
+                    </th>
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-20">
+                      Seats
+                    </th>
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
+                      Extra Seats
+                    </th>
+                    <th className="px-6 py-4 font-semibold uppercase text-xs tracking-wider text-center w-24">
+                      Total Seats
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data.seat_allocation.map((party, index) => (
+                    <tr
+                      key={party.name}
+                      className="hover:bg-blue-50/50 transition-colors group"
+                    >
+                      <td className="px-6 py-4 text-slate-400 font-mono text-sm">
+                        {String(index + 1).padStart(2, "0")}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="shrink-0 w-12 h-12 rounded-lg border border-slate-200 overflow-hidden bg-white group-hover:scale-105 transition-transform">
+                            <img
+                              src={party.symbolUrl}
+                              alt={party.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <span className="font-bold text-slate-800 text-lg truncate">
+                            {party.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-slate-700 font-medium">
+                          {party.votes.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">{party.seats}</td>
+                      <td className="px-6 py-4 text-center">
+                        {party.extraSeats}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {party.totalSeats}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
