@@ -82,7 +82,7 @@ function calculateSeats(parties: Party[]) {
   };
 }
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const CACHE_MAX_AGE = 300; // 5 min, for Cache-Control header
+const CACHE_MAX_AGE = 0; // 5 min, for Cache-Control header
 
 async function fetchElectionData(): Promise<{
   total_votes: number;
