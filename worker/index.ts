@@ -29,7 +29,7 @@ function calculateSeats(parties: Party[]) {
 
   // --- Step 1: Modified Sainte-Laguë allocation (totalSeats) ---
   const divisors: number[] = [1.4];
-  for (let i = 3; divisors.length < TOTAL_SEATS * 2; i += 2) divisors.push(i);
+  for (let i = 3; i <= 4 * TOTAL_SEATS - 1; i += 2) divisors.push(i);
 
   const quotients: { party: string; value: number }[] = [];
   for (const party of qualified) {
@@ -77,8 +77,8 @@ function calculateSeats(parties: Party[]) {
     totalVotes,
     thresholdVotes,
     totalQualifiedVotes,
-    seatAllocation: seatDistribution.sort((a, b) => b.votes - a.votes),
-    invalidParties: invalidParties.sort((a, b) => b.votes - a.votes),
+    seatAllocation: seatDistribution.toSorted((a, b) => b.votes - a.votes),
+    invalidParties: invalidParties.toSorted((a, b) => b.votes - a.votes),
   };
 }
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -212,7 +212,10 @@ api.get("/election-results", async (c) => {
   const cached = await caches.default.match(cacheReq);
 
   if (cached) {
-    const cachedAt = parseInt(cached.headers.get("X-Cached-At") || "0", 10);
+    const cachedAt = Number.parseInt(
+      cached.headers.get("X-Cached-At") || "0",
+      10,
+    );
     const isFresh = cachedAt > 0 && now - cachedAt < CACHE_TTL_MS;
 
     if (isFresh) {
